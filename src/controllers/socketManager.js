@@ -6,9 +6,18 @@ let messages = {};
 let timeOnline = {};
 
 export const connectToSocket = (server) => {
-  const io = new Server(server);
+  const io = new Server(server,{
+      cors: {
+          origin: "*",
+          methods: ["GET", "POST"],
+          allowedHeaders: ["*"],
+          credentials: true
+      }
+  });
 
   io.on("connection", (socket) => {
+
+    console.log("something connected");
     socket.on("join-call", (path) => {
       if (connections[path] === undefined) {
         connections[path] = [];
@@ -36,7 +45,7 @@ export const connectToSocket = (server) => {
       }
 
       socket.on("signal", (told, message) => {
-        io.to(toId).emit("signal", socket.id, message);
+        io.to(told).emit("signal", socket.id, message);
       });
       socket.on("chat-message", (data, sender) => {
         const [matchingRoom, found] = Object.entries(connections).reduce(
